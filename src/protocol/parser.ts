@@ -98,7 +98,36 @@ export function parse(buf: Buffer, offset: number): ParseResult {
       if (!r.ok) return r;
       return { ok: true, value: { type: 'integer', value: r.value }, next: r.next };
     }
-    case 0x24 /* '$' */:
+    case 0x24 /* '$' */: {
+      const len = parseInteger(buf, offset + 1);
+      if (!len.ok) return len;
+      // Null bulk: $-1\r\n — no payload, no trailing CRLF.
+      if (len.value === -1n) {
+        return { ok: true, value: { type: 'bulk', value: null }, next: len.next };
+      }
+      if (len.value < 0n) {
+        throw new Error(`malformed RESP: invalid bulk length ${len.value}`);
+      }
+      // Bulk length fits in a JS number safely in practice — Redis caps bulk
+      // strings at 512 MB. Convert here so we can index into the buffer.
+      const length = Number(len.value);
+      const payloadStart = len.next;
+      const payloadEnd = payloadStart + length;
+      // Need payload + trailing CRLF.
+      if (buf.length < payloadEnd + 2) return { ok: false, need: 'more' };
+      if (buf[payloadEnd] !== CR || buf[payloadEnd + 1] !== LF) {
+        throw new Error('malformed RESP: bulk payload not terminated by CRLF');
+      }
+      // subarray returns a view into the same memory. The streaming wrapper
+      // will eventually slice off the consumed prefix, after which this view
+      // would dangle — so copy with Buffer.from to be safe.
+      const payload = Buffer.from(buf.subarray(payloadStart, payloadEnd));
+      return {
+        ok: true,
+        value: { type: 'bulk', value: payload },
+        next: payloadEnd + 2,
+      };
+    }
     case 0x2a /* '*' */:
       throw new Error(`not implemented yet: prefix ${String.fromCharCode(prefix)}`);
     default:
