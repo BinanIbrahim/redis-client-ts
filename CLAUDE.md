@@ -65,8 +65,8 @@ docker-compose.yml
   can follow along and learn.
 
 ## Status
-- [ ] Project setup (TS, Vitest, Docker, ESLint, Prettier)
-- [ ] RESP2 parser (streaming)
+- [x] Project setup (TS, Vitest, Docker, ESLint, Prettier)
+- [x] RESP2 parser (streaming) — all five types: simple, error, integer, bulk, array
 - [ ] TCP connection + basic GET/SET
 - [ ] Remaining core commands (DEL, EXPIRE, INCR, HGET, HSET)
 - [ ] Pipelining

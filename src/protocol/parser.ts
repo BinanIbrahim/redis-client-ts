@@ -1,4 +1,4 @@
-import type { ParseResult } from './types.js';
+import type { ParseResult, RespValue } from './types.js';
 
 const CR = 0x0d; // '\r'
 const LF = 0x0a; // '\n'
@@ -128,8 +128,27 @@ export function parse(buf: Buffer, offset: number): ParseResult {
         next: payloadEnd + 2,
       };
     }
-    case 0x2a /* '*' */:
-      throw new Error(`not implemented yet: prefix ${String.fromCharCode(prefix)}`);
+    case 0x2a /* '*' */: {
+      const count = parseInteger(buf, offset + 1);
+      if (!count.ok) return count;
+      // Null array: *-1\r\n — no elements.
+      if (count.value === -1n) {
+        return { ok: true, value: { type: 'array', value: null }, next: count.next };
+      }
+      if (count.value < 0n) {
+        throw new Error(`malformed RESP: invalid array length ${count.value}`);
+      }
+      const n = Number(count.value);
+      const elements: RespValue[] = [];
+      let pos = count.next;
+      for (let i = 0; i < n; i++) {
+        const el = parse(buf, pos);
+        if (!el.ok) return el;
+        elements.push(el.value);
+        pos = el.next;
+      }
+      return { ok: true, value: { type: 'array', value: elements }, next: pos };
+    }
     default:
       throw new Error(
         `malformed RESP: unknown prefix byte 0x${prefix?.toString(16) ?? '??'} at offset ${offset}`,
