@@ -67,8 +67,8 @@ docker-compose.yml
 ## Status
 - [x] Project setup (TS, Vitest, Docker, ESLint, Prettier)
 - [x] RESP2 parser (streaming) — parser, serializer, RespReader; all five value types
-- [ ] TCP connection + basic GET/SET
-- [ ] Remaining core commands (DEL, EXPIRE, INCR, HGET, HSET)
+- [x] TCP connection + basic GET/SET
+- [x] Remaining core commands (DEL, EXPIRE, INCR, HGET, HSET)
 - [ ] Pipelining
 - [ ] Pub/sub with reconnection
 - [ ] Connection pool
