@@ -69,9 +69,9 @@ docker-compose.yml
 - [x] RESP2 parser (streaming) — parser, serializer, RespReader; all five value types
 - [x] TCP connection + basic GET/SET
 - [x] Remaining core commands (DEL, EXPIRE, INCR, HGET, HSET)
-- [ ] Pipelining
+- [x] Pipelining
 - [ ] Pub/sub with reconnection
-- [ ] Connection pool
+- [x] Connection pool
 - [ ] Distributed lock (Redlock + fencing tokens)
 - [ ] Rate limiter
 - [ ] Message queue
