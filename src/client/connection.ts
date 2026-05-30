@@ -1,4 +1,4 @@
-import { connect as netConnect, type Socket } from 'node:net';
+import { Socket } from 'node:net';
 import { serializeCommand } from '../protocol/serializer.js';
 import { RespReader } from '../protocol/stream.js';
 import type { RespValue } from '../protocol/types.js';
@@ -24,7 +24,7 @@ export class RedisConnection {
   private readonly pending: PendingCommand[] = [];
   private socket: Socket | null = null;
 
-  constructor(private readonly socketFactory: () => Socket = () => netConnect()) {}
+  constructor(private readonly socketFactory: () => Socket = () => new Socket()) {}
 
   connect(options: ConnectionOptions): Promise<void> {
     return new Promise((resolve, reject) => {
