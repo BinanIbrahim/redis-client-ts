@@ -244,3 +244,126 @@ describe('parse: bulk strings', () => {
     });
   });
 });
+
+describe('parse: arrays', () => {
+  it('parses the empty array *0\\r\\n', () => {
+    const buf = Buffer.from('*0\r\n');
+    expect(parse(buf, 0)).toEqual({
+      ok: true,
+      value: { type: 'array', value: [] },
+      next: 4,
+    });
+  });
+
+  it('parses *2\\r\\n+foo\\r\\n+bar\\r\\n', () => {
+    const buf = Buffer.from('*2\r\n+foo\r\n+bar\r\n');
+    expect(parse(buf, 0)).toEqual({
+      ok: true,
+      value: {
+        type: 'array',
+        value: [
+          { type: 'simple', value: 'foo' },
+          { type: 'simple', value: 'bar' },
+        ],
+      },
+      next: 16,
+    });
+  });
+
+  it('parses a mixed-type array (bulk, integer, simple)', () => {
+    const buf = Buffer.from('*3\r\n$3\r\nfoo\r\n:42\r\n+OK\r\n');
+    expect(parse(buf, 0)).toEqual({
+      ok: true,
+      value: {
+        type: 'array',
+        value: [
+          { type: 'bulk', value: Buffer.from('foo') },
+          { type: 'integer', value: 42n },
+          { type: 'simple', value: 'OK' },
+        ],
+      },
+      next: 23,
+    });
+  });
+
+  it('parses the null array *-1\\r\\n', () => {
+    const buf = Buffer.from('*-1\r\n');
+    expect(parse(buf, 0)).toEqual({
+      ok: true,
+      value: { type: 'array', value: null },
+      next: 5,
+    });
+  });
+
+  it('parses nested arrays recursively', () => {
+    const buf = Buffer.from('*1\r\n*2\r\n+inner\r\n:7\r\n');
+    expect(parse(buf, 0)).toEqual({
+      ok: true,
+      value: {
+        type: 'array',
+        value: [
+          {
+            type: 'array',
+            value: [
+              { type: 'simple', value: 'inner' },
+              { type: 'integer', value: 7n },
+            ],
+          },
+        ],
+      },
+      next: 20,
+    });
+  });
+
+  it('parses a typical command array *3\\r\\n$3\\r\\nSET\\r\\n$3\\r\\nkey\\r\\n$5\\r\\nvalue\\r\\n', () => {
+    const buf = Buffer.from('*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n$5\r\nvalue\r\n');
+    expect(parse(buf, 0)).toEqual({
+      ok: true,
+      value: {
+        type: 'array',
+        value: [
+          { type: 'bulk', value: Buffer.from('SET') },
+          { type: 'bulk', value: Buffer.from('key') },
+          { type: 'bulk', value: Buffer.from('value') },
+        ],
+      },
+      next: 33,
+    });
+  });
+
+  it('returns need: more when count CRLF is missing', () => {
+    const buf = Buffer.from('*2');
+    expect(parse(buf, 0)).toEqual({ ok: false, need: 'more' });
+  });
+
+  it('returns need: more when an element is incomplete', () => {
+    const buf = Buffer.from('*2\r\n+foo\r\n+ba');
+    expect(parse(buf, 0)).toEqual({ ok: false, need: 'more' });
+  });
+
+  it('returns need: more when only the prefix byte has arrived', () => {
+    const buf = Buffer.from('*');
+    expect(parse(buf, 0)).toEqual({ ok: false, need: 'more' });
+  });
+
+  it('throws on negative length other than -1', () => {
+    const buf = Buffer.from('*-2\r\n');
+    expect(() => parse(buf, 0)).toThrow(/malformed RESP/);
+  });
+
+  it('respects offset: parses two arrays back-to-back', () => {
+    const buf = Buffer.from('*1\r\n+OK\r\n*1\r\n+PONG\r\n');
+    const first = parse(buf, 0);
+    expect(first).toEqual({
+      ok: true,
+      value: { type: 'array', value: [{ type: 'simple', value: 'OK' }] },
+      next: 9,
+    });
+    if (!first.ok) throw new Error('unreachable');
+    expect(parse(buf, first.next)).toEqual({
+      ok: true,
+      value: { type: 'array', value: [{ type: 'simple', value: 'PONG' }] },
+      next: 20,
+    });
+  });
+});
