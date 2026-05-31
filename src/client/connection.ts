@@ -14,10 +14,10 @@ type PendingCommand = {
 };
 
 /**
- * One TCP connection to Redis with sequential request/response correlation.
+ * One TCP connection to Redis with FIFO request/response correlation.
  *
- * Pipelining is intentionally out of scope here — each `sendCommand` must
- * receive its matching response before the next command is sent.
+ * Multiple `sendCommand` calls may be in flight at once (pipelining): each
+ * write is queued in order and matched to the next complete RESP frame.
  */
 export class RedisConnection {
   private readonly reader = new RespReader();
