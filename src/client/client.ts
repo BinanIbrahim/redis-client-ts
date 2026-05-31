@@ -66,4 +66,10 @@ export class RedisClient {
       await this.connection.sendCommand(['HSET', key, field, value]),
     );
   }
+
+  async publish(channel: string, message: string): Promise<number> {
+    return integerToNumber(
+      await this.connection.sendCommand(['PUBLISH', channel, message]),
+    );
+  }
 }

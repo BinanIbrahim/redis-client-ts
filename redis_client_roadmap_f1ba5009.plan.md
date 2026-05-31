@@ -19,7 +19,7 @@ todos:
     status: completed
   - id: phase-3-pubsub
     content: "TDD: pub/sub + reconnect tests first, then implement subscriber connection"
-    status: pending
+    status: completed
   - id: phase-4-lock
     content: "TDD: lock + fencing token tests first, then implement Redlock-style acquire/release"
     status: pending
@@ -49,7 +49,8 @@ isProject: false
 | 2026-05-30 | Phase 0 — Stream wrapper | **Done** | 7 tests in [stream.test.ts](tests/protocol/stream.test.ts); `RespReader` in [stream.ts](src/protocol/stream.ts). Commit `b9cda98` on `parser/stream`. 56 tests passing. **Phase 0 complete.** |
 | 2026-05-30 | Phase 1 — TCP + KV client | **Done** | Merged to `main` (`3c1c450`). 79 tests passing (6 integration). |
 | 2026-05-30 | Phase 2 — Pipelining + pool | **Done** | Branch `client/phase-2` (2 commits). 89 tests passing. |
-| — | Phase 3 — Pub/sub | Next | — |
+| 2026-05-31 | Phase 3 — Pub/sub + reconnect | **Done** | Branch `client/phase-3` (3 commits). `SubscriberConnection` with confirmation-based subscribe, exponential backoff reconnect, resubscribe replay. 103 tests passing (3 integration including CLIENT KILL resubscribe). |
+| — | Phase 4 — Distributed lock | Next | — |
 
 ---
 
