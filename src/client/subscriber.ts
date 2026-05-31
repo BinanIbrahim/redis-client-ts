@@ -11,6 +11,9 @@ type PendingAck = {
   reject: (error: Error) => void;
 };
 
+const INITIAL_BACKOFF_MS = 100;
+const MAX_BACKOFF_MS = 5000;
+
 /**
  * A connection dedicated to Redis pub/sub.
  *
@@ -24,39 +27,42 @@ type PendingAck = {
  *     time, with no client request. They are dispatched to the per-channel
  *     handler.
  *
- * A Redis connection in subscribed mode rejects most other commands, so this
- * type is intentionally separate from RedisConnection rather than bolted on.
+ * On socket close (not from an explicit disconnect()), reconnects with
+ * exponential backoff up to MAX_BACKOFF_MS, then replays SUBSCRIBE for every
+ * tracked channel so handlers stay live across network blips. Pending
+ * subscribe/unsubscribe acks reject on close — the caller asked for a specific
+ * confirmation, so silently bridging across a disconnect would lie.
  */
 export class SubscriberConnection {
   private readonly reader = new RespReader();
   private readonly handlers = new Map<string, MessageHandler>();
   private readonly pendingAcks: PendingAck[] = [];
   private socket: Socket | null = null;
+  private options: ConnectionOptions | null = null;
+  private backoffMs = INITIAL_BACKOFF_MS;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private closed = false;
+  // Confirmations expected from replayed SUBSCRIBEs after reconnect. These
+  // have no caller to resolve, so they are consumed before pendingAcks.
+  private silentAcks = 0;
 
   constructor(private readonly socketFactory: () => Socket = () => new Socket()) {}
 
   connect(options: ConnectionOptions): Promise<void> {
+    this.options = options;
+    this.closed = false;
     return new Promise((resolve, reject) => {
-      const socket = this.socketFactory();
-      this.socket = socket;
-
-      socket.once('connect', () => resolve());
-      socket.once('error', reject);
-
-      socket.on('data', (chunk: Buffer) => {
-        this.onData(chunk);
-      });
-
-      socket.on('error', (err: Error) => {
-        this.rejectAllAcks(err);
-      });
-
-      socket.on('close', () => {
-        this.rejectAllAcks(new Error('connection closed'));
-        this.socket = null;
-      });
-
-      socket.connect(options.port, options.host);
+      const socket = this.openSocket();
+      const onConnect = (): void => {
+        socket.off('error', onError);
+        resolve();
+      };
+      const onError = (err: Error): void => {
+        socket.off('connect', onConnect);
+        reject(err);
+      };
+      socket.once('connect', onConnect);
+      socket.once('error', onError);
     });
   }
 
@@ -86,8 +92,58 @@ export class SubscriberConnection {
   }
 
   disconnect(): void {
+    this.closed = true;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     this.socket?.end();
     this.socket = null;
+  }
+
+  private openSocket(): Socket {
+    const socket = this.socketFactory();
+    this.socket = socket;
+
+    socket.on('connect', () => {
+      this.backoffMs = INITIAL_BACKOFF_MS;
+      this.replaySubscriptions();
+    });
+
+    socket.on('data', (chunk: Buffer) => {
+      this.onData(chunk);
+    });
+
+    socket.on('error', (err: Error) => {
+      this.rejectAllAcks(err);
+    });
+
+    socket.on('close', () => {
+      this.rejectAllAcks(new Error('connection closed'));
+      this.socket = null;
+      if (!this.closed) this.scheduleReconnect();
+    });
+
+    if (this.options) socket.connect(this.options.port, this.options.host);
+    return socket;
+  }
+
+  private scheduleReconnect(): void {
+    const delay = this.backoffMs;
+    this.backoffMs = Math.min(this.backoffMs * 2, MAX_BACKOFF_MS);
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      if (this.closed) return;
+      this.openSocket();
+    }, delay);
+  }
+
+  private replaySubscriptions(): void {
+    if (this.handlers.size === 0 || !this.socket) return;
+    for (const channel of this.handlers.keys()) {
+      this.silentAcks += 1;
+      this.socket.write(serializeCommand(['SUBSCRIBE', channel]));
+    }
   }
 
   private onData(chunk: Buffer): void {
@@ -124,6 +180,10 @@ export class SubscriberConnection {
     }
 
     if (kind === 'subscribe' || kind === 'unsubscribe') {
+      if (this.silentAcks > 0) {
+        this.silentAcks -= 1;
+        return;
+      }
       this.pendingAcks.shift()?.resolve();
     }
   }
