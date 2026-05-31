@@ -33,7 +33,9 @@ function sleep(ms: number): Promise<void> {
 }
 
 async function processMessage(msg: Message): Promise<void> {
-  console.log(`worker[${CONSUMER_ID}]: processing id=${msg.id} attempts=${msg.attempts} payload=${JSON.stringify(msg.payload)}`);
+  console.log(
+    `worker[${CONSUMER_ID}]: processing id=${msg.id} attempts=${msg.attempts} payload=${JSON.stringify(msg.payload)}`,
+  );
   await sleep(200);
   if (msg.payload === 'POISON') {
     throw new Error('intentional failure (POISON)');
@@ -42,7 +44,9 @@ async function processMessage(msg: Message): Promise<void> {
 
 const reclaimed = await worker.reclaim();
 if (reclaimed > 0) {
-  console.log(`worker[${CONSUMER_ID}]: reclaimed ${reclaimed} abandoned in-flight message(s) from previous run`);
+  console.log(
+    `worker[${CONSUMER_ID}]: reclaimed ${reclaimed} abandoned in-flight message(s) from previous run`,
+  );
 }
 
 let running = true;
@@ -53,7 +57,9 @@ async function shutdown(): Promise<void> {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
-console.log(`worker[${CONSUMER_ID}]: waiting for jobs on queue "${QUEUE_NAME}" (max ${MAX_ATTEMPTS} attempts before DLQ)`);
+console.log(
+  `worker[${CONSUMER_ID}]: waiting for jobs on queue "${QUEUE_NAME}" (max ${MAX_ATTEMPTS} attempts before DLQ)`,
+);
 
 while (running) {
   const msg = await worker.dequeue({ blockMs: 5000 });
@@ -66,7 +72,9 @@ while (running) {
   } catch (err) {
     const nextAttempts = msg.attempts + 1;
     const dest = nextAttempts >= MAX_ATTEMPTS ? 'DLQ' : 'main queue';
-    console.log(`worker[${CONSUMER_ID}]: nack id=${msg.id} -> ${dest} (next attempts=${nextAttempts}): ${(err as Error).message}`);
+    console.log(
+      `worker[${CONSUMER_ID}]: nack id=${msg.id} -> ${dest} (next attempts=${nextAttempts}): ${(err as Error).message}`,
+    );
     await worker.nack(msg);
   }
 }

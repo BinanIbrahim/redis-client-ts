@@ -4,10 +4,7 @@ export const VERSION = '0.0.1';
 export { RedisClient } from './client/client.js';
 export { RedisConnection, type ConnectionOptions } from './client/connection.js';
 export { ConnectionPool, type PoolOptions } from './client/pool.js';
-export {
-  SubscriberConnection,
-  type MessageHandler,
-} from './client/subscriber.js';
+export { SubscriberConnection, type MessageHandler } from './client/subscriber.js';
 export type { CommandRunner } from './client/command-runner.js';
 
 // Protocol layer (mostly internal; RespValue is exposed because the

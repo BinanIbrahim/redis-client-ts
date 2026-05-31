@@ -44,7 +44,12 @@ async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
-function send(res: ServerResponse, status: number, body: unknown, headers: Record<string, string> = {}): void {
+function send(
+  res: ServerResponse,
+  status: number,
+  body: unknown,
+  headers: Record<string, string> = {},
+): void {
   res.writeHead(status, { 'Content-Type': 'application/json', ...headers });
   res.end(JSON.stringify(body));
 }

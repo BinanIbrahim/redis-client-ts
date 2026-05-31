@@ -75,7 +75,7 @@ docker-compose.yml
 - [x] Distributed lock (Redlock + fencing tokens)
 - [x] Rate limiter
 - [x] Message queue
-- [ ] README + architecture write-up
+- [x] README + architecture write-up
 
 ## Notes
 - The whole point of the protocol layer is to build it from scratch.
