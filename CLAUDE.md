@@ -73,7 +73,7 @@ docker-compose.yml
 - [x] Pub/sub with reconnection
 - [x] Connection pool
 - [x] Distributed lock (Redlock + fencing tokens)
-- [ ] Rate limiter
+- [x] Rate limiter
 - [ ] Message queue
 - [ ] README + architecture write-up
 
