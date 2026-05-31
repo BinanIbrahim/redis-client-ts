@@ -27,7 +27,13 @@ export type Lock = {
  * INCR runs only on successful claim, so fence numbers handed out grow
  * strictly in acquire order (gaps are impossible because losers don't INCR).
  *
- * Release will land in slice 2 (WATCH/MULTI/EXEC for atomic check-and-delete).
+ * Release uses WATCH/MULTI/EXEC for atomic check-and-delete (no Lua per the
+ * project scope). The flow is: WATCH the lock key, GET it, compare to our
+ * secret. If it doesn't match, the lock is already gone (expired or
+ * re-acquired by someone else) — UNWATCH and return. If it matches, MULTI/
+ * DEL/EXEC: WATCH ensures the transaction aborts if anyone modified the key
+ * between GET and EXEC, so we can never DEL a key that has since been
+ * re-acquired by another holder.
  */
 export class RedisLock {
   constructor(private readonly runner: CommandRunner) {}
@@ -55,7 +61,32 @@ export class RedisLock {
 
     return {
       token: fenceResult.value,
-      release: () => Promise.resolve(), // slice 2
+      release: () => this.release(key, secret),
     };
+  }
+
+  private async release(key: string, secret: string): Promise<void> {
+    await this.runner.sendCommand(['WATCH', key]);
+
+    const current = await this.runner.sendCommand(['GET', key]);
+    const matches =
+      current.type === 'bulk' &&
+      current.value !== null &&
+      current.value.toString('utf8') === secret;
+
+    if (!matches) {
+      // Lock isn't ours (expired or someone else holds it). Release the
+      // server-side WATCH so the connection isn't left with stale state.
+      await this.runner.sendCommand(['UNWATCH']);
+      return;
+    }
+
+    await this.runner.sendCommand(['MULTI']);
+    await this.runner.sendCommand(['DEL', key]);
+    // EXEC returns the array of queued results on commit, or null (null array)
+    // if WATCH was triggered. Either way release() resolves: a null EXEC means
+    // someone else modified the key between our GET and EXEC, so our DEL did
+    // not run — the lock is effectively gone, which is the desired post-state.
+    await this.runner.sendCommand(['EXEC']);
   }
 }
