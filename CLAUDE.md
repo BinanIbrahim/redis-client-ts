@@ -74,7 +74,7 @@ docker-compose.yml
 - [x] Connection pool
 - [x] Distributed lock (Redlock + fencing tokens)
 - [x] Rate limiter
-- [ ] Message queue
+- [x] Message queue
 - [ ] README + architecture write-up
 
 ## Notes
