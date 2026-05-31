@@ -149,4 +149,4 @@ The rule throughout: write a failing test that pins the wire shape or behavior, 
 
 ## License
 
-MIT
+[Apache License 2.0](LICENSE) — Copyright 2026 Binan Ibrahim.
