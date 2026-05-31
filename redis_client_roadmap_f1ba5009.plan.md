@@ -31,7 +31,7 @@ todos:
     status: completed
   - id: phase-7-cv
     content: README architecture doc, demo app, update CLAUDE.md status
-    status: pending
+    status: completed
   - id: phase-8-stretch
     content: "Optional: cache-aside helper (only stretch pattern recommended for v1)"
     status: pending
@@ -53,7 +53,8 @@ isProject: false
 | 2026-05-31 | Phase 4 — Distributed lock + fencing tokens | **Done** | Branch `client/phase-4` (3 commits). Single-node SET-NX-PX acquire, WATCH/MULTI/EXEC release (no Lua), monotonic fence via INCR `<key>:fence`. 115 tests passing (4 integration including mutex, TTL expiry, fence monotonicity, safe-release-after-expiry). |
 | 2026-05-31 | Phase 5 — Token bucket rate limiter | **Done** | Branch `client/phase-5` (2 commits). Hash-backed state with WATCH/MULTI/EXEC; injectable clock; bounded retries; internal per-instance serialization to respect Redis's per-connection transaction state. 126 tests passing (4 integration including burst, refill, and concurrent acquirers honoring the capacity bound). |
 | 2026-05-31 | Phase 6 — Reliable message queue | **Done** | Branch `client/phase-6` (2 commits). LPUSH + BLMOVE + per-consumer in-flight lists; ack/nack/reclaim; DLQ on attempts ≥ maxAttempts; nack atomic via MULTI. Visibility timeout intentionally NOT enforced (caller's responsibility). 142 tests passing (6 integration including FIFO, ack, nack-with-retry, DLQ routing, reclaim recovery, blocking timeout). |
-| — | Phase 7 — CV polish (README + demo + index exports) | Next | — |
+| 2026-05-31 | Phase 7 — CV polish | **Done** | Branch `client/phase-7` (4 commits). index.ts exposes every pattern; demo: HTTP server (per-IP rate limit + enqueue) + worker (dequeue + retry + DLQ + reclaim); top-level README with architecture diagram, per-pattern design writeups, and the "out of scope" tradeoff table. 143 tests passing. |
+| — | Phase 8 (optional stretch) — Cache-aside helper | Next | — |
 
 ---
 
