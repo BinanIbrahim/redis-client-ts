@@ -22,7 +22,7 @@ todos:
     status: completed
   - id: phase-4-lock
     content: "TDD: lock + fencing token tests first, then implement Redlock-style acquire/release"
-    status: pending
+    status: completed
   - id: phase-5-ratelimit
     content: "TDD: rate limiter tests first (unit + integration), then implement algorithm"
     status: pending
@@ -50,7 +50,8 @@ isProject: false
 | 2026-05-30 | Phase 1 — TCP + KV client | **Done** | Merged to `main` (`3c1c450`). 79 tests passing (6 integration). |
 | 2026-05-30 | Phase 2 — Pipelining + pool | **Done** | Branch `client/phase-2` (2 commits). 89 tests passing. |
 | 2026-05-31 | Phase 3 — Pub/sub + reconnect | **Done** | Branch `client/phase-3` (3 commits). `SubscriberConnection` with confirmation-based subscribe, exponential backoff reconnect, resubscribe replay. 103 tests passing (3 integration including CLIENT KILL resubscribe). |
-| — | Phase 4 — Distributed lock | Next | — |
+| 2026-05-31 | Phase 4 — Distributed lock + fencing tokens | **Done** | Branch `client/phase-4` (3 commits). Single-node SET-NX-PX acquire, WATCH/MULTI/EXEC release (no Lua), monotonic fence via INCR `<key>:fence`. 115 tests passing (4 integration including mutex, TTL expiry, fence monotonicity, safe-release-after-expiry). |
+| — | Phase 5 — Rate limiter | Next | — |
 
 ---
 

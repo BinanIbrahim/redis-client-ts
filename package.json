@@ -12,7 +12,7 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:integration": "vitest run tests/client/integration",
+    "test:integration": "vitest run tests/client/integration tests/patterns/integration",
     "test:watch": "vitest",
     "lint": "eslint .",
     "format": "prettier --write .",
