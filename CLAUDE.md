@@ -70,7 +70,7 @@ docker-compose.yml
 - [x] TCP connection + basic GET/SET
 - [x] Remaining core commands (DEL, EXPIRE, INCR, HGET, HSET)
 - [x] Pipelining
-- [ ] Pub/sub with reconnection
+- [x] Pub/sub with reconnection
 - [x] Connection pool
 - [ ] Distributed lock (Redlock + fencing tokens)
 - [ ] Rate limiter
