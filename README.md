@@ -145,7 +145,7 @@ The rule throughout: write a failing test that pins the wire shape or behavior, 
 - ✅ Phase 4 — Distributed lock with fencing tokens
 - ✅ Phase 5 — Token bucket rate limiter
 - ✅ Phase 6 — Reliable message queue
-- 🚧 Phase 7 — CV polish (this README, demo app, public exports)
+- ✅ Phase 7 — README, demo app, public exports
 
 ## License
 
