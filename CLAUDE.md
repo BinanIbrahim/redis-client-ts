@@ -72,7 +72,7 @@ docker-compose.yml
 - [x] Pipelining
 - [x] Pub/sub with reconnection
 - [x] Connection pool
-- [ ] Distributed lock (Redlock + fencing tokens)
+- [x] Distributed lock (Redlock + fencing tokens)
 - [ ] Rate limiter
 - [ ] Message queue
 - [ ] README + architecture write-up
