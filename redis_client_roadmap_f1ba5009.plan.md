@@ -25,7 +25,7 @@ todos:
     status: completed
   - id: phase-5-ratelimit
     content: "TDD: rate limiter tests first (unit + integration), then implement algorithm"
-    status: pending
+    status: completed
   - id: phase-6-queue
     content: "TDD: queue tests first (enqueue/dequeue/visibility/DLQ), then implement"
     status: pending
@@ -51,7 +51,8 @@ isProject: false
 | 2026-05-30 | Phase 2 — Pipelining + pool | **Done** | Branch `client/phase-2` (2 commits). 89 tests passing. |
 | 2026-05-31 | Phase 3 — Pub/sub + reconnect | **Done** | Branch `client/phase-3` (3 commits). `SubscriberConnection` with confirmation-based subscribe, exponential backoff reconnect, resubscribe replay. 103 tests passing (3 integration including CLIENT KILL resubscribe). |
 | 2026-05-31 | Phase 4 — Distributed lock + fencing tokens | **Done** | Branch `client/phase-4` (3 commits). Single-node SET-NX-PX acquire, WATCH/MULTI/EXEC release (no Lua), monotonic fence via INCR `<key>:fence`. 115 tests passing (4 integration including mutex, TTL expiry, fence monotonicity, safe-release-after-expiry). |
-| — | Phase 5 — Rate limiter | Next | — |
+| 2026-05-31 | Phase 5 — Token bucket rate limiter | **Done** | Branch `client/phase-5` (2 commits). Hash-backed state with WATCH/MULTI/EXEC; injectable clock; bounded retries; internal per-instance serialization to respect Redis's per-connection transaction state. 126 tests passing (4 integration including burst, refill, and concurrent acquirers honoring the capacity bound). |
+| — | Phase 6 — Message queue | Next | — |
 
 ---
 

@@ -52,6 +52,12 @@ export class TokenBucketRateLimiter {
   private readonly now: () => number;
   private readonly maxRetries: number;
   private readonly ttlMs: number;
+  // Serializes concurrent tryAcquire calls on this instance. Redis transaction
+  // state (MULTI/EXEC) is per-connection, so two parallel WATCH→...→EXEC
+  // sequences on the same socket collide with "ERR MULTI calls can not be
+  // nested". We chain calls through a promise so only one transaction is in
+  // flight at a time per limiter instance.
+  private inflight: Promise<unknown> = Promise.resolve();
 
   constructor(
     private readonly runner: CommandRunner,
@@ -67,8 +73,20 @@ export class TokenBucketRateLimiter {
   }
 
   async tryAcquire(key: string): Promise<RateLimitDecision> {
-    const redisKey = `limiter:${key}`;
+    const prior = this.inflight;
+    let release!: () => void;
+    this.inflight = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    try {
+      await prior;
+      return await this.runAttempts(`limiter:${key}`);
+    } finally {
+      release();
+    }
+  }
 
+  private async runAttempts(redisKey: string): Promise<RateLimitDecision> {
     for (let attempt = 0; attempt < this.maxRetries; attempt++) {
       const decision = await this.attempt(redisKey);
       if (decision !== 'retry') return decision;
