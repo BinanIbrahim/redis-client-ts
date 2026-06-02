@@ -65,17 +65,8 @@ docker-compose.yml
   can follow along and learn.
 
 ## Status
-- [x] Project setup (TS, Vitest, Docker, ESLint, Prettier)
-- [x] RESP2 parser (streaming) — parser, serializer, RespReader; all five value types
-- [x] TCP connection + basic GET/SET
-- [x] Remaining core commands (DEL, EXPIRE, INCR, HGET, HSET)
-- [x] Pipelining
-- [x] Pub/sub with reconnection
-- [x] Connection pool
-- [x] Distributed lock (Redlock + fencing tokens)
-- [x] Rate limiter
-- [x] Message queue
-- [x] README + architecture write-up
+
+See the [roadmap progress log](redis_client_roadmap_f1ba5009.plan.md#progress-log) — single source of truth for what each phase shipped and when.
 
 ## Notes
 - The whole point of the protocol layer is to build it from scratch.

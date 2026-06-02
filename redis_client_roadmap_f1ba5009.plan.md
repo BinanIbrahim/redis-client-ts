@@ -293,14 +293,7 @@ These strengthen the CV story without scope creep:
 
 ## What to explicitly keep out of v1
 
-Stay disciplined — these dilute the "built from scratch" narrative:
-
-- RESP3, Redis Cluster, Sentinel
-- Streams, Lua scripting, Redis modules
-- Full command coverage (Redis has 400+ commands)
-- Competing with `ioredis` on API ergonomics
-
-Your v2 Rust/Go rewrite is the right place to revisit performance and broader command support.
+The canonical scope rules live in [PROJECT_CONVENTIONS.md → Scope](PROJECT_CONVENTIONS.md). In short: no RESP3, no Cluster/Sentinel, no Streams, no Lua, no modules, no full command coverage, no API parity with `ioredis`. The v2 Rust/Go rewrite is the right place to revisit those.
 
 ---
 
