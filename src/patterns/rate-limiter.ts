@@ -39,7 +39,7 @@ const DEFAULT_MAX_RETRIES = 3;
  * (capped at capacity), then either consumes 1 or denies.
  *
  * Atomicity uses WATCH + MULTI/HSET/PEXPIRE/EXEC — same pattern as RedisLock.
- * No Lua per CLAUDE.md scope; the WATCH guarantees we never write tokens
+ * No Lua per PROJECT_CONVENTIONS.md scope; the WATCH guarantees we never write tokens
  * computed from a stale read. Aborted EXECs retry up to `maxRetries` times.
  *
  * The hash key carries a PEXPIRE of (capacity / rate) seconds × 2 so idle

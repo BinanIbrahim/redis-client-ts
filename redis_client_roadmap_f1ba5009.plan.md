@@ -30,7 +30,7 @@ todos:
     content: "TDD: queue tests first (enqueue/dequeue/visibility/DLQ), then implement"
     status: completed
   - id: phase-7-cv
-    content: README architecture doc, demo app, update CLAUDE.md status
+    content: README architecture doc, demo app, update PROJECT_CONVENTIONS.md status
     status: completed
   - id: phase-8-stretch
     content: "Optional: cache-aside helper (only stretch pattern recommended for v1)"
@@ -75,7 +75,7 @@ Your list mixes **three different layers**. Building them out of order creates r
 
 ## Development methodology: bottom-up, test-first
 
-This is a hard constraint from [CLAUDE.md](CLAUDE.md): *"Test-driven where reasonable: write the test, then the implementation."* Every phase below follows the same loop you already used for bulk strings (PR #1).
+This is a hard constraint from [PROJECT_CONVENTIONS.md](PROJECT_CONVENTIONS.md): *"Test-driven where reasonable: write the test, then the implementation."* Every phase below follows the same loop you already used for bulk strings (PR #1).
 
 ```mermaid
 flowchart LR
@@ -254,7 +254,7 @@ No fixed deadline means **stop adding features when Phases 0–6 are solid** and
 
 1. **README** — architecture diagram, "why from scratch", layer table, how to run tests with Docker.
 2. **One demo app** — e.g. API rate-limited with your limiter + job worker consuming from your queue. Shows end-to-end usage without requiring a production deployment.
-3. **Update [CLAUDE.md](CLAUDE.md) status** — currently all unchecked; keep it accurate as you go.
+3. **Update [PROJECT_CONVENTIONS.md](PROJECT_CONVENTIONS.md) status** — currently all unchecked; keep it accurate as you go.
 4. **Optional benchmark** — pipelined GET latency vs `ioredis` on localhost. One chart in README; not a focus area.
 
 ---
@@ -273,7 +273,7 @@ Instead, add **at most 1–2 stretch patterns** after Phase 6, only if they reus
 | Session store wrapper | HSET, HGET, EXPIRE | Low — thin wrapper over hash | Skip |
 | Delay / priority queue | ZADD + ZRANGEBYSCORE | Medium — reuses queue story | Optional |
 | Bloom filter / RedisJSON / modules | Module commands | Low for this project | **Out of scope** |
-| Streams consumer groups | XADD, XREADGROUP | High conceptually | **Defer to v1.5** (currently out of scope in CLAUDE.md) |
+| Streams consumer groups | XADD, XREADGROUP | High conceptually | **Defer to v1.5** (currently out of scope in PROJECT_CONVENTIONS.md) |
 
 **Recommendation:** after the core 3 patterns, add **cache-aside helper** only. It reuses GET/SET/EXPIRE, takes ~1 focused session, and interviewers recognize it immediately. Skip leaderboard unless you specifically want sorted-set command coverage.
 
