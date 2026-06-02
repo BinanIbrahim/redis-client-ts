@@ -1,5 +1,5 @@
 # redis-client-ts
-
+[![CI](https://github.com/BinanIbrahim/redis-client-ts/actions/workflows/ci.yml/badge.svg)](https://github.com/BinanIbrahim/redis-client-ts/actions/workflows/ci.yml)
 A Redis client built from scratch in TypeScript over raw TCP, plus a small set of production-shaped patterns built on top of that client — distributed lock, token-bucket rate limiter, reliable work queue.
 
 This is a learning + CV project. The point is not to compete with `ioredis` on ergonomics or throughput; the point is to demonstrate end-to-end understanding of the wire protocol, connection lifecycle, and the design tradeoffs behind common Redis-backed patterns.
